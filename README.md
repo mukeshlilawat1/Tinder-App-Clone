@@ -44,7 +44,7 @@ tinder-ai-app/
 ### 1️⃣ Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/tinder-ai-app.git
+git clone https://github.com/mukeshlilawat1/tinder-ai-app.git
 cd tinder-ai-app
 ```
 
@@ -57,8 +57,8 @@ cd server
 - Add your environment variables in `application.properties`:
 
 ```
-spring.data.mongodb.uri=YOUR_MONGO_URI
-openai.api.key=YOUR_OPENAI_KEY
+spring.data.mongodb.uri=
+openai.api.key=
 ```
 
 - Run the Spring Boot app:
