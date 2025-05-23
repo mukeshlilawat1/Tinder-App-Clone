@@ -32,6 +32,9 @@ public class TinderAiBackendApplication implements CommandLineRunner {
     //	run -> this method is used to run the application
     public void run(String... args) {
 
+        profileRepository.deleteAll(); // delete all the profiles in the database
+        conversationRepository.deleteAll(); //delete all the conversations
+
 //		THIS IS USED TO CREATE A NEW PROFILE IN THE DATABASE
         /* Ye method ek `Profiles` object banata hai, jisme user ki details
          * (jaise id, naam, age, gender, profession,
@@ -51,6 +54,21 @@ public class TinderAiBackendApplication implements CommandLineRunner {
         );
 
         profileRepository.save(profile); //save the profile in the database
+
+        Profiles profile2 = new Profiles(
+                "2",
+                "varun",
+                "singh",
+                23,
+                "Indian",
+                Gender.MALE,
+                "Software Engineer",
+                "https://example.com/image.jpg",
+                "INTP"
+        );
+        profileRepository.save(profile2);
+
+//        this method is used to create a new profile in the database
         profileRepository.findAll().forEach(System.out::println);
 
         Conversation conversation = new Conversation(
