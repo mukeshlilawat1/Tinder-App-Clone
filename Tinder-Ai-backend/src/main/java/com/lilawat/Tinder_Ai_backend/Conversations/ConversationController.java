@@ -2,8 +2,12 @@ package com.lilawat.Tinder_Ai_backend.Conversations;
 
 
 import com.lilawat.Tinder_Ai_backend.profiles.ProfileRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,14 +22,17 @@ import java.util.UUID;
 // this class is used to handle the conversation requests
 public class ConversationController {
 
-//     this is used to inject the conversation repository bean
+    private static final Logger log = LoggerFactory.getLogger(ConversationController.class);
+    //     this is used to inject the conversation repository bean
     private final ConversationRepository conversationRepository;
     private final ProfileRepository profileRepository;
+    private final ConversionService conversionService;
 
-//    constructor -> this is used to create a new conversation controller
-    public ConversationController(ConversationRepository conversationRepository, ProfileRepository profileRepository) {
+    //    constructor -> this is used to create a new conversation controller
+    public ConversationController(ConversationRepository conversationRepository, ProfileRepository profileRepository, ConversionService conversionService) {
         this.conversationRepository = conversationRepository;
         this.profileRepository = profileRepository;
+        this.conversionService = conversionService;
     }
 
     @PostMapping("/conversations") // this annotation is used to create a new conversation
@@ -36,20 +43,51 @@ public class ConversationController {
 
 //    @PostMapping("/conversations") will handle post requests to the /coversations endpoint.
 //    @RequestBody -> is a spring annotation that indicates that a method parameter should be bound to the body of the web request.
-    public Conversation createNewConversation(@RequestBody CreateConversationRequest request){
+    public Conversation createNewConversation(@RequestBody CreateConversationRequest request) {
         profileRepository.findById(request.profileId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "unable to find a profile with id : " + request.profileId));
 
         Conversation conversation = new Conversation(
                 UUID.randomUUID().toString(),
                 request.profileId(),
-              new ArrayList<>()
+                new ArrayList<>()
         );
         conversationRepository.save(conversation);
         return conversation;
     }
 
-//    createconversationrequest -> this is a record that is used to create a new conversation
+    @PostMapping("/conversations/{conversationId}")
+    public Conversation addMessageToConversation(
+            @PathVariable String conversationId,
+            @RequestBody ChatMessage chatMessage) {
+//        @PathVariable -> is a spring annotation that indicates that a method parameter should be bound to a url template variable.
+//        @RequestBody -> is a spring annotation that indicates that a method parameter should be bound to the body of the web request.
+
+//        conversation -> this is used to find the conversation by id
+        Conversation conversation = conversationRepository.findById(conversationId).
+//                orElseThrow -> this is used to throw an exception if the conversation is not found
+                orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Unable to find conversation id : " + conversationId
+                ));
+
+//  profileRepository -> this is used to find the profile by id
+        profileRepository.findById(chatMessage.AuthorId()).
+                orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Unable to find profile with id :" + chatMessage.AuthorId()
+                ));
+//        TODO : Need to validate that the author of a message happens to be only the profile associated with the message user
+        ChatMessage messageWithTime = new ChatMessage(
+                chatMessage.messageText(),
+                chatMessage.AuthorId(),
+                LocalDateTime.now()
+        );
+        conversation.messages().add(messageWithTime);
+        conversationRepository.save(conversation);
+        return conversation;
+
+    }
+
+    //    createconversationrequest -> this is a record that is used to create a new conversation
     public record CreateConversationRequest(
             String profileId
     ) {
