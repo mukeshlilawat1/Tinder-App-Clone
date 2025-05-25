@@ -6,10 +6,14 @@ import com.lilawat.Tinder_Ai_backend.Conversations.ConversationRepository;
 import com.lilawat.Tinder_Ai_backend.profiles.Gender;
 import com.lilawat.Tinder_Ai_backend.profiles.ProfileRepository;
 import com.lilawat.Tinder_Ai_backend.profiles.Profiles;
+import org.springframework.ai.ollama.OllamaChatModel;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,12 +29,18 @@ public class TinderAiBackendApplication implements CommandLineRunner {
     @Autowired
     private ConversationRepository conversationRepository;
 
+    @Autowired
+    OllamaChatModel chatModel;
+
     public static void main(String[] args) {
         SpringApplication.run(TinderAiBackendApplication.class, args);
     }
 
     //	run -> this method is used to run the application
     public void run(String... args) {
+
+        String response = chatModel.call("who is koushik kothagal");
+        System.out.println(response);
 
         profileRepository.deleteAll(); // delete all the profiles in the database
         conversationRepository.deleteAll(); //delete all the conversations

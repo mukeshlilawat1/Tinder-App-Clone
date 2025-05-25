@@ -7,10 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
@@ -56,6 +53,17 @@ public class ConversationController {
         return conversation;
     }
 
+//    GetMapping -> is a spring annotation that is used to map http get requests onto specific handler methods.
+    @GetMapping("/conversations/{conversationId}")
+    public Conversation getConversation(
+            @PathVariable String conversationId
+    ){
+        return conversationRepository.findById(conversationId).
+                orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "Unable to find conversation with id : " + conversationId
+                ));
+    }
+
     @PostMapping("/conversations/{conversationId}")
     public Conversation addMessageToConversation(
             @PathVariable String conversationId,
@@ -84,7 +92,6 @@ public class ConversationController {
         conversation.messages().add(messageWithTime);
         conversationRepository.save(conversation);
         return conversation;
-
     }
 
     //    createconversationrequest -> this is a record that is used to create a new conversation
